@@ -44,7 +44,7 @@ export default function SideNav() {
                 Home
               </button>
               <button onClick={() => handleNavigation('/home/subject-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                จัดการราชวิชา
+                จัดการรายวิชา
               </button>
               <button onClick={() => handleNavigation('/home/user-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
                 จัดการผู้ใช้

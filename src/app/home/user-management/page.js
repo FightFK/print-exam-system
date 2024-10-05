@@ -36,10 +36,10 @@ export default function Page() {
         <div className="mt-6 overflow-x-auto">
           <table className="min-w-full border border-black">
             <thead>
-              <tr className="w-full bg-slate-300 border-b">
-                <th className="p-4 text-left text-gray-600 font-medium">Name</th>
-                <th className="p-4 text-left text-gray-600 font-medium">Permission</th>
-                <th className="p-4 text-left text-gray-600 font-medium">Actions</th>
+              <tr className="w-full bg-pink-500 border-b">
+                <th className="p-4 text-left text-white px-4 py-2">Name</th>
+                <th className="p-4 text-left text-white px-4 py-2">Permission</th>
+                <th className="p-4 text-left text-white ">Actions</th>
               </tr>
             </thead>
             <tbody>
