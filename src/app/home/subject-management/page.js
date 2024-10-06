@@ -1,10 +1,100 @@
-import React from 'react';
-import { PencilIcon, TrashIcon } from '@heroicons/react/outline'; 
+"use client";
+import React, { useEffect, useState } from 'react';
+import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
 
 export default function Page() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userId, setUserId] = useState('');
+  const [subjectCode, setSubjectCode] = useState('');
+  const [subjectName, setSubjectName] = useState('');
+  const [year, setYear] = useState('');
+  const [terms, setTerms] = useState('');
+  const [semester, setSemester] = useState('');
+  const [numsOfStudents, setNumsOfStudents] = useState('');
+  const [tutors, setTutors] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [tutorNames, setTutorNames] = useState({});
+  const [searchCode, setSearchCode] = useState(''); // state สำหรับการค้นหา
+
+  const fetchTutors = async () => {
+    const response = await fetch('/api/getUsers');
+    const data = await response.json();
+    setTutors(data);
+  };
+
+  const fetchSubjects = async () => {
+    const response = await fetch('/api/getSubjects');
+    const data = await response.json();
+    setSubjects(data);
+    fetchTutorNames(data);
+  };
+
+  const fetchTutorNames = async (subjects) => {
+    const uniqueUserIds = [...new Set(subjects.map((subject) => subject.UID))];
+
+    const tutorPromises = uniqueUserIds.map(async (uid) => {
+      const response = await fetch(`/api/findUser?uid=${uid}`);
+      const data = await response.json();
+      return { uid, name: data.name };
+    });
+
+    const tutorData = await Promise.all(tutorPromises);
+    const tutorNameMap = tutorData.reduce((acc, tutor) => {
+      acc[tutor.uid] = tutor.name;
+      return acc;
+    }, {});
+
+    setTutorNames(tutorNameMap);
+  };
+
+  useEffect(() => {
+    fetchTutors();
+    fetchSubjects();
+  }, []);
+
+  const handleAddSubject = async () => {
+    const response = await fetch('/api/addSubject', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        SubID: subjectCode,
+        SubName: subjectName,
+        UID: userId,
+        Year: year,
+        Terms: terms,
+        Semester: semester,
+        Nums_of_student: numsOfStudents,
+      }),
+    });
+    
+
+    if (response.ok) {
+      console.log('Subject added successfully');
+      setIsModalOpen(false);
+      fetchSubjects();
+      setSubjectCode('');
+      setSubjectName('');
+      setUserId('');
+      setYear('');
+      setTerms('');
+      setSemester('');
+      setNumsOfStudents('');
+    } else {
+      console.error('Failed to add subject');
+    }
+  };
+
+  // ฟังก์ชันสำหรับกรอง subjects ตามรหัสวิชา
+  const filteredSubjects = subjects.filter(subject =>
+    subject.Subid.toLowerCase().includes(searchCode.toLowerCase())
+  );
+
+  
+
   return (
     <div className="flex flex-col h-full bg-gray-200">
-      {/* แทบค้นหาและ ตัว add ที่เพิ่มมา*/}
       <div className="p-7 bg-pink-500 flex items-center justify-between">
         <div className="relative flex items-center">
           <svg
@@ -29,44 +119,126 @@ export default function Page() {
           </svg>
           <input
             type="text"
-            placeholder="รหัสวิชา"
+            placeholder="ค้นหารหัสวิชา"
+            value={searchCode} // เพิ่มค่า value
+            onChange={(e) => setSearchCode(e.target.value)} // เพิ่ม onChange
             className="pl-20 pr-20 py-2 bg-white rounded-full focus:outline-none text-gray-700"
           />
         </div>
-        <button className="bg-white text-red-500 font-semibold py-2 px-6 rounded-full hover:bg-gray-100">
+        <button 
+          onClick={() => setIsModalOpen(true)} 
+          className="bg-white text-red-500 font-semibold py-2 px-6 rounded-full hover:bg-gray-100"
+        >
           Add
         </button>
       </div>
 
-      {/*  ตัวตาราง */}
-      <div className="flex-1 p-6 overflow-auto">
-        <table className="min-w-full table-auto">
-          <thead>
-            <tr className="bg-pink-500 text-white">
-              <th className="px-4 py-2">Course code</th>
-              <th className="px-4 py-2">Subject name</th>
-              <th className="px-4 py-2">Tutor</th>
-              <th className="px-4 py-2">Tool</th>
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-lg w-96 h-100">
+            <h2 className="text-lg font-bold mb-4">Add Subject</h2>
+            <input
+              type="text"
+              placeholder="Course code"
+              value={subjectCode}
+              onChange={(e) => setSubjectCode(e.target.value)}
+              className="border p-2 rounded mb-2 w-full"
+            />
+            <input
+              type="text"
+              placeholder="Subject name"
+              value={subjectName}
+              onChange={(e) => setSubjectName(e.target.value)}
+              className="border p-2 rounded mb-2 w-full"
+            />
+            <select 
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)} 
+              className="border p-2 rounded mb-2 w-full"
+            >
+              <option value="">Select Tutor</option>
+              {tutors.map((tutor) => (
+                <option key={tutor.id} value={tutor.id}>
+                  {tutor.id} - {tutor.full_name}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="text"
+              placeholder="Year"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              className="border p-2 rounded mb-2 w-full"
+            />
+            <input
+              type="text"
+              placeholder="Terms"
+              value={terms}
+              onChange={(e) => setTerms(e.target.value)}
+              className="border p-2 rounded mb-2 w-full"
+            />
+            <input
+              type="text"
+              placeholder="Semester"
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              className="border p-2 rounded mb-2 w-full"
+            />
+            <input
+              type="text"
+              placeholder="Number of Students"
+              value={numsOfStudents}
+              onChange={(e) => setNumsOfStudents(e.target.value)}
+              className="border p-2 rounded mb-4 w-full"
+            />
+
+            <div className="flex justify-end">
+              <button onClick={handleAddSubject} className="bg-green-500 text-white px-4 py-2 rounded mr-2">
+                Add Subject
+              </button>
+              <button onClick={() => setIsModalOpen(false)} className="bg-gray-300 text-black px-4 py-2 rounded">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-auto">
+        <table className="min-w-full mt-5">
+          <thead className="w-full bg-pink-500 border-b">
+            <tr className="w-full bg-pink-500 border-b">
+              <th className="py-2 px-4 text-white">รหัสวิชา</th>
+              <th className="py-2 px-4 text-white">ชื่อวิชา</th>
+              <th className="py-2 px-4 text-white">ผู้สอน</th>
+              <th className="py-2 px-4 text-white">ปีการศึกษา</th>
+              <th className="py-2 px-4 text-white">เทอม</th>
+              <th className="py-2 px-4 text-white">ภาคการศึกษา</th>
+              <th className="py-2 px-4 text-white">จำนวนผู้เรียน</th>
+              <th className="py-2 px-4 text-white">จัดการ</th>
             </tr>
           </thead>
           <tbody className="bg-white">
-            <tr>
-              <td className="border px-4 py-2">340-100</td>
-              <td className="border px-4 py-2">Technology-together</td>
-              <td className="border px-4 py-2">Chinnapong</td>
-              <td className="border px-4 py-2 flex justify-around">
-                  {/*  ปุ่ม edit  */}
-                <button className="bg-yellow-300 hover:bg-yellow-400 text-gray-800 px-3 py-2 rounded-lg flex items-center">
-                  <PencilIcon className="h-4 w-4 mr-1" />
-                  Edit
-                </button>
-                  {/*  ปุ่ม Delete */}
-                <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg flex items-center">
-                  <TrashIcon className="h-4 w-4 mr-1" />
-                  Delete
-                </button>
-              </td>
-            </tr>
+            {filteredSubjects.map((subject) => ( // ใช้ filteredSubjects แทน subjects
+              <tr key={subject.SubID} className="border-b">
+                <td className="py-2 px-4">{subject.Subid}</td>
+                <td className="py-2 px-4">{subject.Subname}</td>
+                <td className="py-2 px-4">{tutorNames[subject.UID]}</td>
+                <td className="py-2 px-4">{subject.Year}</td>
+                <td className="py-2 px-4">{subject.Terms}</td>
+                <td className="py-2 px-4">{subject.Semester}</td>
+                <td className="py-2 px-4">{subject.Nums_of_student}</td>
+                <td className="py-2 px-4">
+                  <button className="text-blue-500 hover:underline"  >
+                    <PencilIcon className="h-5 w-5 inline" />
+                  </button>
+                  <button className="text-red-500 hover:underline ml-2">
+                    <TrashIcon className="h-5 w-5 inline" />
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
