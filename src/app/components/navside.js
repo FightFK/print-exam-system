@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // นำเข้า useRouter
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/solid'; // นำเข้าไอคอน
+import { supabase } from '@/lib/supabase'; // นำเข้า Supabase Client
 
 export default function SideNav() {
   const [isOpen, setIsOpen] = useState(true); // สถานะเปิด-ปิด
@@ -17,6 +18,16 @@ export default function SideNav() {
   const handleNavigation = (path) => {
     if (router.pathname !== path) { // ตรวจสอบว่า URL ปัจจุบันไม่ตรงกับ path
       router.push(path); // นำทางไปยัง path ที่ระบุ
+    }
+  };
+
+  // ฟังก์ชันออกจากระบบ
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut(); // เรียกใช้ signOut ของ Supabase
+    if (error) {
+      console.error('Error signing out:', error.message); // แสดงข้อความผิดพลาด
+    } else {
+      router.push('/login'); // นำทางไปยังหน้า login หลังออกจากระบบ
     }
   };
 
@@ -35,7 +46,7 @@ export default function SideNav() {
         {isOpen && (
           <>
             <div className="flex flex-col items-center mb-8">
-              <img src="/background.png" alt="Printing Exam System" className="w-20 h-20" />
+              <img src="images/background.png" alt="Printing Exam System" className="w-20 h-20" />
               <h3 className="mt-4 text-center font-semibold">PRINTING EXAM SYSTEM</h3>
             </div>
 
@@ -54,7 +65,10 @@ export default function SideNav() {
               </button>
             </div>
             <div className="mt-auto">
-              <button className="w-32 h-12 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-white">
+              <button
+                onClick={logout} // เรียกใช้ฟังก์ชัน logout
+                className="w-32 h-12 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-white"
+              >
                 LogOut
               </button>
             </div>
