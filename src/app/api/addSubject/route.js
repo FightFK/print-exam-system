@@ -28,6 +28,7 @@ export async function POST(request) {
                     Nums_of_student: Nums_of_student // ใช้ค่าที่ได้จาก request
                 }
             ]);
+            
 
         if (error) {
             return new Response(JSON.stringify({ error: error.message }), { status: 400 });

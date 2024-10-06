@@ -91,6 +91,22 @@ export default function Page() {
     subject.Subid.toLowerCase().includes(searchCode.toLowerCase())
   );
 
+  const handleDeleteSubject = async (SubID) => {
+    try {
+        const response = await fetch('/api/deleteSubject', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ SubjectID: SubID }), // เปลี่ยนชื่อเป็น SubjectID
+        });
+        
+    } catch (error) {
+        console.error('Error deleting Subject:', error.message);
+    }
+    fetchSubjects();
+};
+
   
 
   return (
@@ -233,7 +249,7 @@ export default function Page() {
                   <button className="text-blue-500 hover:underline"  >
                     <PencilIcon className="h-5 w-5 inline" />
                   </button>
-                  <button className="text-red-500 hover:underline ml-2">
+                  <button className="text-red-500 hover:underline ml-2" onClick={() => handleDeleteSubject(subject.Subid)} >
                     <TrashIcon className="h-5 w-5 inline" />
                   </button>
                 </td>

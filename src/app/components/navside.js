@@ -1,7 +1,6 @@
 'use client'; // เพื่อให้ทำงานใน client-side
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // นำเข้า useRouter
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/solid'; // นำเข้าไอคอน
 import { supabase } from '@/lib/supabase'; // นำเข้า Supabase Client
@@ -45,24 +44,32 @@ export default function SideNav() {
         {/* ส่วนที่แสดงเมื่อเปิด */}
         {isOpen && (
           <>
-            <div className="flex flex-col items-center mb-8">
-              <img src="images/background.png" alt="Printing Exam System" className="w-20 h-20" />
-              <h3 className="mt-4 text-center font-semibold">PRINTING EXAM SYSTEM</h3>
+            <div className="flex flex-col items-center mb-8 w-full"> {/* เพิ่ม w-full ที่นี่ */}
+              <img 
+                src="images/background.png" 
+                alt="Logo" 
+                className="w-full h-28 object-cover" // ปรับขนาดสูงเป็น 28
+              />
+              <h3 className="mt-2 text-center font-semibold text-xl">PRINTING EXAM SYSTEM</h3>
             </div>
 
             <div className="flex flex-col space-y-4">
-              <button onClick={() => handleNavigation('/home')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                Home
-              </button>
-              <button onClick={() => handleNavigation('/home/subject-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                จัดการรายวิชา
-              </button>
-              <button onClick={() => handleNavigation('/home/user-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                จัดการผู้ใช้
-              </button>
-              <button onClick={() => handleNavigation('/home/exam-status')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                สถานะข้อสอบ
-              </button>
+                  <button onClick={() => handleNavigation('/home')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+                    Home
+                  </button>
+                  <button onClick={() => handleNavigation('/home/subject-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+                    จัดการรายวิชา
+                  </button>
+                  <button onClick={() => handleNavigation('/home/user-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+                    จัดการผู้ใช้
+                  </button>
+                  
+                  <button onClick={() => handleNavigation('/home/exam-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+                    จัดการข้อสอบ
+                  </button>
+                  <button onClick={() => handleNavigation('/home/exam-status')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+                    สถานะข้อสอบ
+                  </button>
             </div>
             <div className="mt-auto">
               <button
