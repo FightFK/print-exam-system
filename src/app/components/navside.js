@@ -47,11 +47,13 @@ export default function SideNav() {
             <div className="flex flex-col items-center mb-8 w-full"> {/* เพิ่ม w-full ที่นี่ */}
             <img src="/images/background.png" alt="Logo" className="w-full h-28 object-cover" />
 
-              <h3 className="mt-2 text-center font-semibold text-xl">PRINTING EXAM SYSTEM</h3>
+            <h3 className="mt-2 text-center font-semibold text-xl">
+                      <span style={{ color: 'Red' }}>PRINTING</span> EXAM SYSTEM
+            </h3>
             </div>
 
             <div className="flex flex-col space-y-4">
-                  <button onClick={() => handleNavigation('/home')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+                  <button onClick={() => handleNavigation('/home')} className="w-32 h-1npm 2 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
                     Home
                   </button>
                   <button onClick={() => handleNavigation('/home/subject-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
