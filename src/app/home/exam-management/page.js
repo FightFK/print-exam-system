@@ -157,82 +157,7 @@ export default function Page() {
         </button>
       </div>
 
-      {/* Modal สำหรับเพิ่มข้อมูล */}
-      {showModal && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-8 rounded-lg w-96 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4">เพิ่มข้อสอบ</h2>
-            <div className="flex flex-col space-y-4">
-              <input
-                type="text"
-                name="examid"
-                placeholder="รหัสข้อสอบ"
-                value={formData.examid}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 rounded"
-              />
-              <select
-                name="subid"
-                value={formData.subid}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 rounded"
-              >
-                <option value="">เลือกวิชา</option>
-                {subjects.map((subject) => (
-                  <option key={subject.id} value={subject.id}>
-                    {subject.Subname}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                name="UID"
-                placeholder="รหัสผู้สอน"
-                value={formData.UID}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 rounded"
-              />
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 rounded"
-              />
-              <input
-                type="file"
-                name="exam_link_file"
-                accept=".pdf"
-                onChange={(e) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    exam_link_file: e.target.files[0],
-                  }));
-                }}
-              />
-              <textarea
-                name="additional_desc"
-                placeholder="รายละเอียดเพิ่มเติม"
-                value={formData.additional_desc}
-                onChange={handleInputChange}
-                className="border border-gray-300 p-2 rounded"
-              />
-            </div>
-            <button
-              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mt-4"
-              onClick={handleAddExam}
-            >
-              เพิ่ม
-            </button>
-            <button
-              className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-700 mt-2"
-              onClick={() => setShowModal(false)}
-            >
-              ปิด
-            </button>
-          </div>
-        </div>
-      )}
+    
 
       {/* ตารางข้อสอบ */}
       <div className="overflow-auto">
@@ -476,6 +401,39 @@ export default function Page() {
     </div>
   </div>
 )}
+  {/* Modal for viewing exam details */}
+{showModalView && (
+  <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+    <div className="bg-white rounded-lg p-8 max-w-lg w-full shadow-lg">
+      <h3 className="text-lg font-semibold mb-4">รายละเอียดข้อสอบ</h3>
+      {selectedExam && (
+        <div>
+          <p><strong>รหัสข้อสอบ:</strong> {selectedExam.examid}</p>
+          <p><strong>ชื่อวิชา:</strong> {selectedExam.subjects?.Subname}</p>
+          <p><strong>ชื่ออาจารย์:</strong> {selectedExam.users?.full_name}</p>
+          <p><strong>วันที่:</strong> {new Date(selectedExam.date).toLocaleString()}</p>
+          <p><strong>เวลาเริ่มสอบ:</strong> {selectedExam.start_exam}</p>
+          <p><strong>เวลาสิ้นสุดสอบ:</strong> {selectedExam.end_exam}</p>
+          <p><strong>ห้องสอบ:</strong> {selectedExam.room}</p>
+          <p><strong>ประเภทข้อสอบ:</strong> {selectedExam.type_of_exam}</p>
+          <p><strong>สาขาวิชา:</strong> {selectedExam.field_of_study}</p>
+          <p><strong>อุปกรณ์เสริม:</strong> {selectedExam.equipment}</p>
+          <p><strong>ภาคการศึกษา:</strong> {selectedExam.semester}</p>
+          <p>โทรศัพท์ผู้ส่ง: {selectedExam.tel_sender_exam}</p>
+          <p><strong>โทรศัพท์ผู้ประสานงาน:</strong> {selectedExam.tel_coordinator_exam}</p>
+         
+        </div>
+      )}
+      <button
+        className="bg-gray-500 text-white py-2 px-4 rounded mt-4 hover:bg-gray-700"
+        onClick={handleCloseModalView}
+      >
+        ปิด
+      </button>
+    </div>
+  </div>
+)}
+
 
     </div>
   );
