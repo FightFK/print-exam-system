@@ -1,13 +1,36 @@
 'use client'; // เพื่อให้ทำงานใน client-side
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // นำเข้า useRouter
 import { ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/solid'; // นำเข้าไอคอน
 import { supabase } from '@/lib/supabase'; // นำเข้า Supabase Client
 
 export default function SideNav() {
   const [isOpen, setIsOpen] = useState(true); // สถานะเปิด-ปิด
+  const [role, setRole] = useState(''); // สถานะ role
   const router = useRouter(); // ใช้งาน useRouter
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const userEmail = session.user.email;
+        const { data: userData, error } = await supabase
+          .from('users')
+          .select('role') // ดึง role จากตาราง users
+          .eq('email', userEmail)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user role:', error.message);
+        } else if (userData) {
+          setRole(userData.role); // ตั้งค่า role ที่ได้รับจากเซิร์ฟเวอร์
+        }
+      }
+    };
+
+    fetchUserRole();
+  }, []);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen); // สลับสถานะ
@@ -43,50 +66,96 @@ export default function SideNav() {
       <div className={`flex flex-col justify-between items-center h-full py-8`}>
         {/* ส่วนที่แสดงเมื่อเปิด */}
         {isOpen && (
-          <>
-            <div className="flex flex-col items-center mb-8 w-full"> {/* เพิ่ม w-full ที่นี่ */}
-            <img src="/images/background.png" alt="Logo" className="w-full h-28 object-cover" />
+  <>
+    <div className="flex flex-col items-center mb-8 w-full">
+      <img src="/images/background.png" alt="Logo" className="w-full h-28 object-cover" />
+      <h3 className="mt-2 text-center font-semibold text-xl">
+        <span style={{ color: 'Red' }}>PRINTING</span> EXAM SYSTEM
+      </h3>
+    </div>
 
-            <h3 className="mt-2 text-center font-semibold text-xl">
-                      <span style={{ color: 'Red' }}>PRINTING</span> EXAM SYSTEM
-            </h3>
-            </div>
+    <div className="flex flex-col space-y-4">
+      {/* ทุกRoleมี Home */}
+          <button onClick={() => handleNavigation('/home')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            Home
+          </button>
+      {/* สำหรับบทบาท Developer */}
+      {role === 'Developer' && (
+        <>
+          
+          <button onClick={() => handleNavigation('/home/user-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            จัดการผู้ใช้
+          </button>
+          <button onClick={() => handleNavigation('/home/exam-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            จัดการข้อสอบ
+          </button>
+          <button onClick={() => handleNavigation('/home/subject-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            จัดการรายวิชา
+          </button>
+          <button onClick={() => handleNavigation('/home/examup')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            อัปโหลดข้อสอบ
+          </button>
+          <button onClick={() => handleNavigation('/home/exam-status')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            สถานะข้อสอบ
+          </button>
+          <button onClick={() => handleNavigation('/home/examdown')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            ดาวน์โหลดข้อสอบ
+          </button>
+        </>
+      )}
+      {/* สำหรับบทบาทอื่น ๆ */}
+      {role === 'Admin' && (
+        <>
+          <button onClick={() => handleNavigation('/home/user-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            จัดการผู้ใช้
+          </button>
+          <button onClick={() => handleNavigation('/home/exam-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            จัดการข้อสอบ
+          </button>
+        </>
+      )}
+      {role === 'Teacher' && (
+        <>
+          <button onClick={() => handleNavigation('/home/examup')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            อัปโหลดข้อสอบ
+          </button>
+          <button onClick={() => handleNavigation('/home/status')} className="w-32 h-12 py-0 px-5 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            ตรวจดูสถานะข้อสอบ
+          </button>
+        </>
+      )}
+      {role === 'Officer' && (
+        <>
+          <button onClick={() => handleNavigation('/home/subject-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            จัดการรายวิชา
+          </button>
+          <button onClick={() => handleNavigation('/home/exam-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            จัดการข้อสอบ
+          </button>
+          <button onClick={() => handleNavigation('/home/exam-status')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            สถานะข้อสอบ
+          </button>
+        </>
+      )}
+      {role === 'Tech' && (
+        <>
+          <button onClick={() => handleNavigation('/home/examdown')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+            ดาวน์โหลดข้อสอบ
+          </button>
+        </>
+      )}
+    </div>
+    <div className="mt-auto">
+      <button
+        onClick={logout}
+        className="w-32 h-12 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-white"
+      >
+        LogOut
+      </button>
+    </div>
+  </>
+)}
 
-            <div className="flex flex-col space-y-4">
-                  <button onClick={() => handleNavigation('/home')} className="w-32 h-1npm 2 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                    Home
-                  </button>
-                  <button onClick={() => handleNavigation('/home/subject-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                    จัดการรายวิชา
-                  </button>
-                  <button onClick={() => handleNavigation('/home/user-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                    จัดการผู้ใช้
-                  </button>
-                  
-                  <button onClick={() => handleNavigation('/home/exam-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                    จัดการข้อสอบ
-                  </button>
-                  <button onClick={() => handleNavigation('/home/exam-status')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                    สถานะข้อสอบ
-                  </button>
-                  <button onClick={() => handleNavigation('/home/examup')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                    อัปโหลดข้อสอบ
-                  </button>
-                  <button onClick={() => handleNavigation('/home/examdown')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-                    ดาวน์โหลดข้อสอบ
-                  </button>
-                 
-            </div>
-            <div className="mt-auto">
-              <button
-                onClick={logout} // เรียกใช้ฟังก์ชัน logout
-                className="w-32 h-12 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-white"
-              >
-                LogOut
-              </button>
-            </div>
-          </>
-        )}
       </div>
 
       {/* ไอคอนเมื่อ sidebar ปิด */}

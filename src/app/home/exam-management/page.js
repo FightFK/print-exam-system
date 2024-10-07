@@ -70,47 +70,48 @@ export default function Page() {
 
   const handleAddExam = async () => {
     try {
-      const response = await fetch("/api/exams/addExam", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      if (response.ok) {
-        const newExam = await response.json();
-        await fetchExams(); // เรียกใช้ fetchExams เพื่ออัปเดตข้อมูลในตาราง
-        setExam([...exam, newExam]);
-        setShowModal(false);
-        setFormData({
-          examid: "",
-          subid: "",
-          UID: "",
-          date: "",
-          exam_link_file: null,
-          type_of_print: "หน้าเดียว",
-          unit: 2,
-          sender_exam: "-",
-          semester: "2024",
-          req_answer_sheet: "yes",
-          section: 1,
-          additional_desc: null,
-          field_of_study: "Computer-Sci",
-          start_exam: "10:00",
-          end_exam: "12:00",
-          room: "BSC0605",
-          equipment: "No",
-          type_of_exam: "",
-          tel_sender_exam: "09",
-          tel_coordinator_exam: "12"
-        }); // รีเซ็ตฟอร์ม
-      } else {
-        console.error("Error adding exam");
-      }
+        const response = await fetch("/api/exams/addExam", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        });
+        if (response.ok) {
+            // หลังจากเพิ่มข้อสอบสำเร็จ ให้ดึงข้อมูลใหม่ทันที
+            fetchExams();
+            
+            // รีเซ็ตฟอร์ม
+            setFormData({
+                examid: "",
+                subid: "",
+                UID: "",
+                date: "",
+                exam_link_file: null,
+                type_of_print: "หน้าเดียว",
+                unit: 2,
+                sender_exam: "-",
+                semester: "2024",
+                req_answer_sheet: "yes",
+                section: 1,
+                additional_desc: null,
+                field_of_study: "Computer-Sci",
+                start_exam: "10:00",
+                end_exam: "12:00",
+                room: "BSC0605",
+                equipment: "No",
+                type_of_exam: "",
+                tel_sender_exam: "",
+                tel_coordinator_exam: "",
+            });
+            setShowModal(false); // ปิด modal
+        } else {
+            console.error("Error adding exam");
+        }
     } catch (error) {
-      console.error("Error adding exam:", error);
+        console.error("Error adding exam:", error);
     }
-  };
+};
 
   const handleDeleteExam = async (examId) => {
     if (confirm("คุณแน่ใจว่าต้องการลบข้อสอบนี้?")) {
@@ -225,8 +226,8 @@ export default function Page() {
         >
           <option value="">เลือกวิชา</option>
           {subjects.map((subject) => (
-            <option key={subject.id} value={subject.subid}>
-              {subject.Subid}
+            <option key={subject.id} value={subject.Subid}>
+               {subject.Subid} - {subject.Subname} {/* แสดงชื่อวิชาที่นี่ */}
             </option>
           ))}
         </select>

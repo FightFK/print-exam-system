@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
           </div>
 
           {/* Main content */}
-          <div className="flex-1  bg-gray-100 h-full overflow-y-auto">
+          <div className="flex-1 p-6 bg-gray-100 h-full overflow-y-auto">
             <div className="container mx-auto">
               {children}
             </div>
