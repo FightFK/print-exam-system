@@ -200,8 +200,8 @@ export default function Page() {
           วันที่: ${new Date(exam.date).toLocaleString()}<br>
           ห้องสอบ: ${exam.room}<br>
           จำนวนนักศึกษา: ${exam.subjects?.Nums_of_student} คน<br>
-          ซองนี้มีข้อสอบ: ${exam.subjects?.Nums_of_student + 2} ชุด<br>
-          มีผู้ไม่เข้าสอบ: ..... คน (นักคณะ....ดอน ${exam.section})<br>
+          ซองนี้มีข้อสอบ: ${parseInt(exam.subjects?.Nums_of_student)+2} ชุด<br>
+          มีผู้ไม่เข้าสอบ: ..... คน (นักศึกษาคณะ..............ดอน ${exam.section})<br>
           อุปกรณ์ที่ใช้ในห้องสอบเพิ่มเติม: <br>
           ${exam.additional_desc ? exam.additional_desc : ''}
         </p>
