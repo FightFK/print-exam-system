@@ -31,7 +31,8 @@ export async function GET(request) {
                 type_of_exam,
                 tel_sender_exam,
                 tel_coordinator_exam,
-                subjects (Subid, Subname), 
+                additional_desc,
+                subjects (Subid, Subname,Nums_of_student), 
                 users (id, full_name)             
             `);
         
