@@ -243,7 +243,7 @@ export default function Page() {
       )}
 
       <div className="flex-1 overflow-auto">
-        <table className="min-w-full mt-5">
+        <table className="min-w-full bg-white border border-gray-300">
           <thead className="w-full bg-pink-500 border-b">
             <tr className="w-full bg-pink-500 border-b">
               <th className="py-2 px-4 text-white">รหัสวิชา</th>

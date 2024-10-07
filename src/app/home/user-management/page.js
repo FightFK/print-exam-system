@@ -177,9 +177,9 @@ export default function Page() {
           </button>
         </div>
 
-        <div className="flex-1 p-6">
+        
           {/* ตารางผู้ใช้งาน */}
-          <div className="mt-6 overflow-y-auto max-h-[500px]"> {/* กำหนด max-height และ overflow */}
+          <div className="overflow-auto"> 
             <table className="min-w-full table-auto">
               <thead>
                 <tr className="w-full bg-pink-500 border-b">
@@ -219,7 +219,7 @@ export default function Page() {
               </tbody>
             </table>
           </div>
-        </div>
+      
 
         {/* Modal สำหรับเพิ่มผู้ใช้ */}
         {isModalOpen && (

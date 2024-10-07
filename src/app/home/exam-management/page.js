@@ -162,13 +162,13 @@ export default function Page() {
       {/* ตารางข้อสอบ */}
       <div className="overflow-auto">
         <table className="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">รหัสข้อสอบ</th>
-              <th className="py-2 px-4 border-b">ชื่อวิชา</th>
-              <th className="py-2 px-4 border-b">ผู้สอน</th>
-              <th className="py-2 px-4 border-b">วัน/เวลา</th>
-              <th className="py-2 px-4 border-b">ดำเนินการ</th>
+          <thead className="w-full bg-pink-500 border-b">
+            <tr  className="w-full bg-pink-500 border-b" >
+              <th className="py-2 px-4 border-b text-white">รหัสข้อสอบ</th>
+              <th className="py-2 px-4 border-b text-white ">ชื่อวิชา</th>
+              <th className="py-2 px-4 border-b text-white">ผู้สอน</th>
+              <th className="py-2 px-4 border-b text-white">วัน/เวลา</th>
+              <th className="py-2 px-4 border-b text-white ">ดำเนินการ</th>
             </tr>
           </thead>
           <tbody className="bg-white">
