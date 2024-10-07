@@ -5,8 +5,8 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Service
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 export async function POST(request) {
-  const { email, password, full_name, role,Field } = await request.json();
-  console.log({ email, full_name, role, Field }); // ก่อนทำการ insert
+  const { email, password, full_name, role,Field,Tele } = await request.json();
+  console.log({ email, full_name, role, Field,Tele }); // ก่อนทำการ insert
 
   // 1. เพิ่มข้อมูลผู้ใช้ในฐานข้อมูล 'users'
   const { data: dbData, error: dbError } = await supabase
@@ -17,6 +17,7 @@ export async function POST(request) {
         full_name,
         role,
         Field,
+        Tele
       },
     ]);
 

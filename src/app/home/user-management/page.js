@@ -11,8 +11,10 @@ export default function Page() {
   const [newUserFullName, setNewUserFullName] = useState('');
   const [newUserRole, setNewUserRole] = useState('User'); // ค่าดีฟอลต์เป็น User
   const [newField, setNewField] = useState(''); // แก้ไขให้ไม่มีค่าดีฟอลต์
+  const [newTele,setNewTele] = useState('');
   const [users, setUsers] = useState([]); // สถานะสำหรับเก็บข้อมูลผู้ใช้
   const [editUser, setEditUser] = useState(null); // สถานะสำหรับเก็บข้อมูลผู้ใช้ที่แก้ไข
+  const [searchTerm, setSearchTerm] = useState(''); // สถานะสำหรับเก็บค่าค้นหา
 
   useEffect(() => {
     fetchUsers();
@@ -21,7 +23,7 @@ export default function Page() {
   const fetchUsers = async () => {
     const { data, error } = await supabase
       .from('users') // ตารางที่เก็บข้อมูลผู้ใช้
-      .select('id, full_name, email, role, Field'); 
+      .select('id, full_name, email, role, Field,Tele'); 
     if (error) {
       console.error('Error fetching users:', error.message);
     } else {
@@ -37,6 +39,7 @@ export default function Page() {
     setNewUserFullName('');
     setNewUserRole('User'); // คืนค่าดีฟอลต์
     setNewField(''); // คืนค่าใหม่ให้เป็นค่าว่าง
+    setNewTele(''); // คืนค่า
   };
 
   const closeEditModal = () => {
@@ -58,6 +61,7 @@ export default function Page() {
           full_name: newUserFullName,
           role: newUserRole,
           Field: newField, // ส่ง Field ไปใน request
+          Tele: newTele,
         }),
       });
   
@@ -86,12 +90,12 @@ export default function Page() {
   const saveEditUser = async () => {
     if (!editUser) return;
 
-    const { id, full_name, role, Field } = editUser;
+    const { id, full_name, role, Field ,Tele} = editUser;
 
     try {
       const { data, error } = await supabase
         .from('users')
-        .update({ full_name, role, Field }) // อัปเดต Field ด้วย
+        .update({ full_name, role, Field,Tele }) // อัปเดต Field ด้วย
         .eq('id', id); // ค้นหาผู้ใช้ตาม ID
 
       if (error) {
@@ -108,101 +112,121 @@ export default function Page() {
 
   const handleDeleteUser = async (userId) => {
     try {
-        console.log('Deleting user with ID:', userId); // เช็ค userId ที่จะลบ
-        const response = await fetch('/api/deleteUser', {
-            method: 'POST', // เปลี่ยนเป็น POST
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId }), // ส่ง userId ไปใน request
-        });
+      console.log('Deleting user with ID:', userId); // เช็ค userId ที่จะลบ
+      const response = await fetch('/api/deleteUser', {
+          method: 'POST', // เปลี่ยนเป็น POST
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId }), // ส่ง userId ไปใน request
+      });
 
-        // ตรวจสอบสถานะการตอบกลับ
-        if (!response.ok) {
-            const errorData = await response.json(); // อ่านข้อมูลที่ส่งกลับ
-            throw new Error(`Error: ${response.status} - ${errorData.error}`);
-        }
+      // ตรวจสอบสถานะการตอบกลับ
+      if (!response.ok) {
+          const errorData = await response.json(); // อ่านข้อมูลที่ส่งกลับ
+          throw new Error(`Error: ${response.status} - ${errorData.error}`);
+      }
 
-        const data = await response.json(); // แปลงข้อมูลเป็น JSON
-        console.log(data.message); // แสดงข้อความที่ส่งกลับ
+      const data = await response.json(); // แปลงข้อมูลเป็น JSON
+      console.log(data.message); // แสดงข้อความที่ส่งกลับ
 
-        fetchUsers(); // อัปเดตข้อมูลผู้ใช้ในตาราง
+      fetchUsers(); // อัปเดตข้อมูลผู้ใช้ในตาราง
     } catch (error) {
-        console.error('Error deleting user:', error.message);
+      console.error('Error deleting user:', error.message);
     }
-};
+  };
 
-  
-  
-  
-  
-  
+  // ฟังก์ชันสำหรับกรองผู้ใช้ตามค่าค้นหา
+  const filteredUsers = users.filter(user =>
+    user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col h-full bg-slate-300">
         {/* แทบค้นหาและ ตัว add ที่เพิ่มมา*/}
         <div className="p-7 bg-pink-500 flex items-center justify-between">
-          <button 
+          <div className="relative flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="h-6 w-6 absolute left-3"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder="ค้นหาชื่อผู้ใช้"
+              className="pl-10 pr-20 py-2 bg-white rounded-full focus:outline-none text-gray-700"
+              value={searchTerm} // เชื่อมโยงกับ state ค้นหา
+              onChange={(e) => setSearchTerm(e.target.value)} // อัปเดตค่าค้นหา
+            />
+          </div>
+          <button
             onClick={() => setIsModalOpen(true)} // เปิด modal เมื่อคลิกปุ่ม
-            className="bg-white text-red-500 font-semibold py-2 px-6 rounded-full hover:bg-gray-100">
+            className="bg-white text-red-500 font-semibold py-2 px-6 rounded-full hover:bg-gray-100"
+          >
             Add
           </button>
         </div>
-        
+
         <div className="flex-1 p-6">
-            {/* ตารางผู้ใช้งาน */}
-            <div className="mt-6 overflow-y-auto max-h-[500px]"> {/* กำหนด max-height และ overflow */}
-              <table className="min-w-full table-auto">
-                <thead>
-                  <tr className="w-full bg-pink-500 border-b">
-                    <th className="p-4 text-left text-white px-4 py-2">Name</th>
-                    <th className="p-4 text-left text-white px-4 py-2">Field of Study</th>
-                    <th className="p-4 text-left text-white px-4 py-2">Email</th>
-                    <th className="p-4 text-left text-white px-4 py-2">Role</th>
-                    <th className="p-4 text-white text-center">Actions</th>
+          {/* ตารางผู้ใช้งาน */}
+          <div className="mt-6 overflow-y-auto max-h-[500px]"> {/* กำหนด max-height และ overflow */}
+            <table className="min-w-full table-auto">
+              <thead>
+                <tr className="w-full bg-pink-500 border-b">
+                  <th className="p-4 text-left text-white px-4 py-2">Name</th>
+                  <th className="p-4 text-left text-white px-4 py-2">Field of Study</th>
+                  <th className="p-4 text-left text-white px-4 py-2">Email</th>
+                  <th className="p-4 text-left text-white px-4 py-2">Role</th>
+                  <th className="p-4 text-left text-white px-4 py-2">Telephone Nums</th>
+                  <th className="p-4 text-white text-center">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody className="bg-white">
+              {filteredUsers.map((user) => (
+                  <tr key={user.id} className="border-opacity-100">
+                    <td className="p-4 text-black border">{user.full_name}</td>
+                    <td className="p-4 text-black border">{user.Field}</td>
+                    <td className="p-4 text-black border">{user.email}</td>
+                    <td className="p-4 text-black border">{user.role}</td>
+                    <td className="p-4 text-black border">{user.Tele}</td>
+                    <td className="p-4 text-black border text-center">
+                      <button
+                        onClick={() => handleEditUser(user)}
+                        className="mr-2 text-yellow-500 hover:text-yellow-700"
+                      >
+                        <PencilIcon className="h-5 w-5 inline-block" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteUser(user.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <TrashIcon className="h-5 w-5 inline-block" />
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-
-                <tbody className="bg-white">
-                  {users.map((user) => (
-                    <tr key={user.id} className="border-opacity-100">
-                      <td className="p-4 text-black border">{user.full_name}</td>
-                      <td className="p-4 text-black border">{user.Field}</td>
-                      <td className="p-4 text-black border">{user.email}</td>
-                      <td className="p-4 text-black border">{user.role}</td>
-                      <td className="p-4 border">
-                          <div className="flex space-x-2 justify-center">
-                            {/* ปุ่ม Edit */}
-                            <button
-                              className="bg-yellow-300 hover:bg-yellow-400 text-gray-800 px-3 py-2 rounded-lg flex items-center mr-10"
-                              onClick={() => handleEditUser(user)} // เรียกใช้ฟังก์ชันแก้ไข
-                            >
-                              <PencilIcon className="h-4 w-4 mr-1" />
-                              Edit
-                            </button>
-                            {/* ปุ่ม Delete */}
-                            <button 
-                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg flex items-center"
-                              onClick={() => handleDeleteUser(user.id)} // ส่ง ID ไปยังฟังก์ชันลบ
-                            >
-                              <TrashIcon className="h-4 w-4 mr-1" />
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
+        </div>
 
-      {/* Modal สำหรับเพิ่มผู้ใช้ */}
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-black text-2xl font-bold mb-4">Add User</h2>
-            <label className="block mb-2 text-gray-700">Email:</label>
+        {/* Modal สำหรับเพิ่มผู้ใช้ */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-96">
+              <h2 className="text-lg font-semibold mb-4">Add User</h2>
+              <label className="block mb-2 text-gray-700">Email:</label>
             <input
               type="email"
               value={newUserEmail}
@@ -250,21 +274,40 @@ export default function Page() {
               <option value="Chem">Chemistry</option>
               {/* เพิ่มตัวเลือกอื่นๆ ตามที่ต้องการ */}
             </select>
-
-            <div className="flex justify-between mt-4">
-              <button onClick={closeModal} className="bg-gray-300 text-black px-4 py-2 rounded">Cancel</button>
-              <button onClick={handleAddUser} className="bg-blue-500 text-white px-4 py-2 rounded">Add User</button>
+            <label className="block mb-2 text-gray-700">Telephone</label>
+              <input
+                type="text"
+                placeholder="Telephone"
+                className="border rounded p-2 mb-4 w-full"
+                value={newTele}
+                onChange={(e) => setNewTele(e.target.value)}
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={closeModal}
+                  className="mr-2 text-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddUser}
+                  className="bg-green-500 text-white px-4 py-2 rounded"
+                >
+                  Add
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Modal สำหรับแก้ไขผู้ใช้ */}
-      {isEditModalOpen && editUser && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-black text-2xl font-bold mb-4">Edit User</h2>
-            <label className="block mb-2 text-gray-700">Email:</label>
+
+
+        {/* Modal สำหรับแก้ไขผู้ใช้ */}
+        {isEditModalOpen && editUser && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-96">
+              <h2 className="text-lg font-semibold mb-4">Edit User</h2>
+              <label className="block mb-2 text-gray-700">Email:</label>
             <input
               type="email"
               value={editUser.email}
@@ -305,14 +348,32 @@ export default function Page() {
           
           
             </select>
-
-            <div className="flex justify-between mt-4">
-              <button onClick={closeEditModal} className="bg-gray-300 text-black px-4 py-2 rounded">Cancel</button>
-              <button onClick={saveEditUser} className="bg-blue-500 text-white px-4 py-2 rounded">Save Changes</button>
+            <label className="block mb-2 text-gray-700">Telephone</label>
+              <input
+                type="text"
+                placeholder="Telephone"
+                className="border rounded p-2 mb-4 w-full"
+                value={editUser.Tele}
+                onChange={(e) => setEditUser({ ...editUser, Tele: e.target.value })}
+              />
+              <div className="flex justify-end">
+              <button
+                  onClick={saveEditUser}
+                  className="bg-blue-500 text-white px-4 py-2 rounded ml-10"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={closeEditModal}
+                  className="mr-2 text-gray-500"
+                >
+                  Cancel
+                </button>
+                
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
   );
 }
