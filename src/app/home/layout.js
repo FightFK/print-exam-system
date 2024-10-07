@@ -7,7 +7,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en"> {/* ปิดแท็กให้ถูกต้อง */}
+      <head>
+        <title>{metadata.title}</title>
+        <meta name="description" content={metadata.description} />
+        {/* Favicon */}
+        <link rel="icon" href="/images/background.png" type="image/x-icon" />
+      </head>
+
       <body>
         <div className="flex h-screen">
           {/* SideNav */}
@@ -26,4 +33,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-
