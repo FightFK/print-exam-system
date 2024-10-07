@@ -1,9 +1,11 @@
-"use client";
+"use client"
 import React, { useEffect, useState } from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
 
 export default function Page() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // state สำหรับเช็คว่าเป็นการแก้ไขหรือไม่
+  const [currentSubject, setCurrentSubject] = useState(null); // เก็บข้อมูลวิชาที่กำลังแก้ไข
   const [userId, setUserId] = useState('');
   const [subjectCode, setSubjectCode] = useState('');
   const [subjectName, setSubjectName] = useState('');
@@ -14,7 +16,7 @@ export default function Page() {
   const [tutors, setTutors] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [tutorNames, setTutorNames] = useState({});
-  const [searchCode, setSearchCode] = useState(''); // state สำหรับการค้นหา
+  const [searchCode, setSearchCode] = useState('');
 
   const fetchTutors = async () => {
     const response = await fetch('/api/getUsers');
@@ -52,97 +54,102 @@ export default function Page() {
     fetchSubjects();
   }, []);
 
-  const handleAddSubject = async () => {
-    const response = await fetch('/api/addSubject', {
-      method: 'POST',
+  const handleAddOrUpdateSubject = async () => {
+    const url = isEditing ? '/api/updateSubject' : '/api/addSubject'; // เปลี่ยน URL ตามการแก้ไขหรือเพิ่ม
+    const method = isEditing ? 'PUT' : 'POST'; // เปลี่ยน method ตามการแก้ไขหรือเพิ่ม
+    const body = {
+      SubID: subjectCode,
+      SubName: subjectName,
+      UID: userId,
+      Year: year,
+      Terms: terms,
+      Semester: semester,
+      Nums_of_student: numsOfStudents,
+    };
+
+    const response = await fetch(url, {
+      method,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        SubID: subjectCode,
-        SubName: subjectName,
-        UID: userId,
-        Year: year,
-        Terms: terms,
-        Semester: semester,
-        Nums_of_student: numsOfStudents,
-      }),
+      body: JSON.stringify(body),
     });
-    
 
     if (response.ok) {
-      console.log('Subject added successfully');
+      console.log(`${isEditing ? 'Subject updated' : 'Subject added'} successfully`);
       setIsModalOpen(false);
       fetchSubjects();
-      setSubjectCode('');
-      setSubjectName('');
-      setUserId('');
-      setYear('');
-      setTerms('');
-      setSemester('');
-      setNumsOfStudents('');
+      resetForm();
     } else {
-      console.error('Failed to add subject');
+      console.error(`${isEditing ? 'Failed to update subject' : 'Failed to add subject'}`);
     }
   };
 
-  // ฟังก์ชันสำหรับกรอง subjects ตามรหัสวิชา
-  const filteredSubjects = subjects.filter(subject =>
-    subject.Subid.toLowerCase().includes(searchCode.toLowerCase())
-  );
+  const resetForm = () => {
+    setSubjectCode('');
+    setSubjectName('');
+    setUserId('');
+    setYear('');
+    setTerms('');
+    setSemester('');
+    setNumsOfStudents('');
+    setCurrentSubject(null);
+    setIsEditing(false); // reset editing state
+  };
+
+  const handleEditSubject = (subject) => {
+    setCurrentSubject(subject);
+    setSubjectCode(subject.Subid);
+    setSubjectName(subject.Subname);
+    setUserId(subject.UID);
+    setYear(subject.Year);
+    setTerms(subject.Terms);
+    setSemester(subject.Semester);
+    setNumsOfStudents(subject.Nums_of_student);
+    setIsEditing(true); // เปลี่ยนสถานะเป็นการแก้ไข
+    setIsModalOpen(true);
+  };
 
   const handleDeleteSubject = async (SubID) => {
     try {
-        const response = await fetch('/api/deleteSubject', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ SubjectID: SubID }), // เปลี่ยนชื่อเป็น SubjectID
-        });
-        
-    } catch (error) {
-        console.error('Error deleting Subject:', error.message);
-    }
-    fetchSubjects();
-};
+      const response = await fetch('/api/deleteSubject', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ SubjectID: SubID }),
+      });
 
-  
+      if (response.ok) {
+        console.log('Subject deleted successfully');
+        fetchSubjects();
+      }
+    } catch (error) {
+      console.error('Error deleting Subject:', error.message);
+    }
+  };
+
+  const filteredSubjects = subjects.filter(subject =>
+    subject.Subid.toLowerCase().includes(searchCode.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col h-full bg-gray-200">
       <div className="p-7 bg-pink-500 flex items-center justify-between">
         <div className="relative flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M8 4a8 8 0 100 16 8 8 0 000-16z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-4.35-4.35"
-            />
-          </svg>
           <input
             type="text"
             placeholder="ค้นหารหัสวิชา"
-            value={searchCode} // เพิ่มค่า value
-            onChange={(e) => setSearchCode(e.target.value)} // เพิ่ม onChange
+            value={searchCode}
+            onChange={(e) => setSearchCode(e.target.value)}
             className="pl-20 pr-20 py-2 bg-white rounded-full focus:outline-none text-gray-700"
           />
         </div>
         <button 
-          onClick={() => setIsModalOpen(true)} 
+          onClick={() => {
+            resetForm();
+            setIsModalOpen(true);
+          }} 
           className="bg-white text-red-500 font-semibold py-2 px-6 rounded-full hover:bg-gray-100"
         >
           Add
@@ -152,7 +159,7 @@ export default function Page() {
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow-lg w-96 h-100">
-            <h2 className="text-lg font-bold mb-4">Add Subject</h2>
+            <h2 className="text-lg font-bold mb-4">{isEditing ? 'Edit Subject' : 'Add Subject'}</h2>
             <input
               type="text"
               placeholder="Course code"
@@ -210,8 +217,8 @@ export default function Page() {
             />
 
             <div className="flex justify-end">
-              <button onClick={handleAddSubject} className="bg-green-500 text-white px-4 py-2 rounded mr-2">
-                Add Subject
+              <button onClick={handleAddOrUpdateSubject} className="bg-green-500 text-white px-4 py-2 rounded mr-2">
+                {isEditing ? 'Update Subject' : 'Add Subject'}
               </button>
               <button onClick={() => setIsModalOpen(false)} className="bg-gray-300 text-black px-4 py-2 rounded">
                 Close
@@ -232,29 +239,26 @@ export default function Page() {
               <th className="py-2 px-4 text-white">เทอม</th>
               <th className="py-2 px-4 text-white">ภาคการศึกษา</th>
               <th className="py-2 px-4 text-white">จำนวนผู้เรียน</th>
-              <th className="py-2 px-4 text-white">จัดการ</th>
+              <th className="py-2 px-4 text-white">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white">
-            {filteredSubjects.map((subject) => ( // ใช้ filteredSubjects แทน subjects
-              <tr key={subject.SubID} className="border-b">
+            {filteredSubjects.map((subject) => (
+              <tr key={subject.Subid} className="border-b hover:bg-gray-100">
                 <td className="py-2 px-4">{subject.Subid}</td>
                 <td className="py-2 px-4">{subject.Subname}</td>
-                <td className="py-2 px-4">{tutorNames[subject.UID]}</td>
+                <td className="py-2 px-4">{tutorNames[subject.UID] || 'Unknown'}</td>
                 <td className="py-2 px-4">{subject.Year}</td>
                 <td className="py-2 px-4">{subject.Terms}</td>
                 <td className="py-2 px-4">{subject.Semester}</td>
                 <td className="py-2 px-4">{subject.Nums_of_student}</td>
-                <td className="py-2 px-4">
-                <button className="bg-yellow-400 text-black font-semibold py-2 px-4 rounded inline-flex items-center">
-                <PencilIcon className="h-5 w-5 mr-2" />
-                        Edit
-                </button>
-                  <button className="bg-red-500 text-white font-semibold py-2 px-4 rounded ml-2 inline-flex items-center" onClick={() => handleDeleteSubject(subject.Subid)}>
-                <TrashIcon className="h-5 w-5 mr-2" />
-                       Delete
-                </button>
-
+                <td className="py-2 px-4 flex space-x-2">
+                  <button onClick={() => handleEditSubject(subject)}>
+                    <PencilIcon className="w-5 h-5 text-blue-500" />
+                  </button>
+                  <button onClick={() => handleDeleteSubject(subject.SubID)}>
+                    <TrashIcon className="w-5 h-5 text-red-500" />
+                  </button>
                 </td>
               </tr>
             ))}

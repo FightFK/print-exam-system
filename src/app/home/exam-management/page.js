@@ -171,30 +171,32 @@ export default function Page() {
               <th className="py-2 px-4 border-b">ดำเนินการ</th>
             </tr>
           </thead>
-          <tbody>
-            {exam.map((item) => (
-              <tr key={item.examid}>
-                <td className="py-2 px-4 border-b">{item.examid}</td>
-                <td className="py-2 px-4 border-b">{item.subjects?.Subname}</td>
-                <td className="py-2 px-4 border-b">{item.users?.full_name}</td>
-                <td className="py-2 px-4 border-b">{item.date}</td>
-                <td className="py-2 px-4 border-b text-center">
-                  <button
-                    onClick={() => handleViewExam(item)}
-                    className="text-blue-500 hover:text-blue-700 mr-10"
-                  >
-                    View
-                  </button>
-                  <button
-                    onClick={() => handleDeleteExam(item.examid)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+          <tbody className="bg-white">
+          {exam.map((item) => (
+            <tr key={item.examid} className="border-b">
+              <td className="py-2 px-4">{item.examid}</td>
+              <td className="py-2 px-4">{item.subjects?.Subname}</td>
+              <td className="py-2 px-4">{item.users?.full_name}</td>
+              <td className="py-2 px-4">{item.date}</td>
+              <td className="py-2 px-4 text-center">
+                <button
+                  onClick={() => handleViewExam(item)}
+                  className="bg-blue-400 text-white font-semibold py-2 px-4 rounded inline-flex items-center mr-2"
+                >
+                  View
+                </button>
+                <button
+                  onClick={() => handleDeleteExam(item.examid)}
+                  className="bg-red-500 text-white font-semibold py-2 px-4 rounded inline-flex items-center"
+                >
+                  <TrashIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+
         </table>
       </div>
 

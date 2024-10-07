@@ -7,7 +7,8 @@ export default function Page() {
     const [exam, setExam] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedExam, setSelectedExam] = useState(null);
-
+    const [file, setFile] = useState(null);
+    
     useEffect(() => {
         const fetchUserEmail = async () => {
             const { data: { session } } = await supabase.auth.getSession();
@@ -53,6 +54,43 @@ export default function Page() {
         setIsModalOpen(true);
     };
 
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]); // เก็บไฟล์ที่เลือกใน state
+    };
+
+    const handleUploadClick = async (examItem) => {
+        if (!file) {
+            alert('กรุณาเลือกไฟล์ก่อนอัปโหลด');
+            return;
+        }
+
+        try {
+            // ตัวอย่างการอัปโหลดไฟล์ไปที่ Supabase Storage
+            const { data, error } = await supabase.storage
+                .from('exams') // สมมติว่าคุณมี bucket ชื่อ exams ใน Supabase
+                .upload(`public/${examItem.examid}/${file.name}`, file);
+
+            if (error) {
+                console.error('Error uploading file:', error);
+                return;
+            }
+
+            // บันทึกลิงก์ไฟล์ที่อัปโหลดในฐานข้อมูล (ตัวอย่างใช้การอัปเดต table exams)
+            const { data: updatedExam, error: updateError } = await supabase
+                .from('exams')
+                .update({ exam_link_file: data?.path })
+                .eq('examid', examItem.examid);
+
+            if (updateError) {
+                console.error('Error updating exam with file link:', updateError);
+            } else {
+                alert('อัปโหลดไฟล์สำเร็จ');
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+        }
+    };
+
     return (
         <div className="bg-white shadow-md rounded-lg p-4 m-4">
             {exam.length > 0 ? (
@@ -68,12 +106,25 @@ export default function Page() {
                             >
                                 View
                             </button>
-                            <button 
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-                                onClick={() => {/* ฟังก์ชันสำหรับ Upload */}}
-                            >
-                                Upload
-                            </button>
+                            
+                            <div className="flex justify-end space-x-2 mt-2">
+                                    <input 
+                                        type="file" 
+                                        className="bg-white border rounded-md text-sm cursor-pointer mt-1"
+                                        onChange={handleFileChange} 
+                                        disabled={examItem.exam_link_file !== null} 
+                                    />
+                                    <button 
+                                        className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors ${examItem.exam_link_file !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        onClick={() => handleUploadClick(examItem)} 
+                                        disabled={examItem.exam_link_file !== null} 
+                                    >
+                                        Upload
+                                    </button>
+                                </div>
+
+
+
                         </div>
                     </div>
                 ))
@@ -88,6 +139,7 @@ export default function Page() {
                         {selectedExam && (
                             <div>
                                 <p>รหัสข้อสอบ: {selectedExam.examid}</p>
+                                <p>ชื่อวิชา: {selectedExam.subjects?.Subname || 'ไม่พบชื่อวิชา'}</p>
                                 <p>รหัสวิชา: {selectedExam.subid}</p>
                                 <p>UID: {selectedExam.UID}</p>
                                 <p>วันที่: {new Date(selectedExam.date).toLocaleString()}</p>
@@ -107,7 +159,7 @@ export default function Page() {
                                 <p>ประเภทข้อสอบ: {selectedExam.type_of_exam}</p>
                                 <p>โทรศัพท์ผู้ส่ง: {selectedExam.tel_sender_exam}</p>
                                 <p>โทรศัพท์ผู้ประสานงาน: {selectedExam.tel_coordinator_exam}</p>
-                                <p>ชื่อวิชา: {selectedExam.subjects?.Subname || 'ไม่พบชื่อวิชา'}</p>
+                               
                             </div>
                         )}
                         <button 

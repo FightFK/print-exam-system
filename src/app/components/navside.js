@@ -72,6 +72,9 @@ export default function SideNav() {
                   <button onClick={() => handleNavigation('/home/examup')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
                     อัปโหลดข้อสอบ
                   </button>
+                  <button onClick={() => handleNavigation('/home/examdown')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
+                    ดาวน์โหลดข้อสอบ
+                  </button>
                  
             </div>
             <div className="mt-auto">
