@@ -5,6 +5,8 @@ import { PencilIcon, TrashIcon } from "@heroicons/react/outline";
 export default function Page() {
   const [exam, setExam] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showModalView, setShowModalView] = useState(false); // Modal View state
+  const [selectedExam, setSelectedExam] = useState(null); // Exam data for viewing
   const [formData, setFormData] = useState({
     examid: "",
     subid: "",
@@ -131,7 +133,16 @@ export default function Page() {
       }
     }
   };
-  
+
+  const handleViewExam = (exam) => {
+    setSelectedExam(exam);
+    setShowModalView(true);
+  };
+
+  const handleCloseModalView = () => {
+    setShowModalView(false);
+    setSelectedExam(null);
+  };
 
   return (
     <div className="flex flex-col h-full bg-gray-200">
@@ -148,7 +159,123 @@ export default function Page() {
 
       {/* Modal สำหรับเพิ่มข้อมูล */}
       {showModal && (
-  <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-8 rounded-lg w-96 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4">เพิ่มข้อสอบ</h2>
+            <div className="flex flex-col space-y-4">
+              <input
+                type="text"
+                name="examid"
+                placeholder="รหัสข้อสอบ"
+                value={formData.examid}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 rounded"
+              />
+              <select
+                name="subid"
+                value={formData.subid}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 rounded"
+              >
+                <option value="">เลือกวิชา</option>
+                {subjects.map((subject) => (
+                  <option key={subject.id} value={subject.id}>
+                    {subject.Subname}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                name="UID"
+                placeholder="รหัสผู้สอน"
+                value={formData.UID}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 rounded"
+              />
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 rounded"
+              />
+              <input
+                type="file"
+                name="exam_link_file"
+                accept=".pdf"
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    exam_link_file: e.target.files[0],
+                  }));
+                }}
+              />
+              <textarea
+                name="additional_desc"
+                placeholder="รายละเอียดเพิ่มเติม"
+                value={formData.additional_desc}
+                onChange={handleInputChange}
+                className="border border-gray-300 p-2 rounded"
+              />
+            </div>
+            <button
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mt-4"
+              onClick={handleAddExam}
+            >
+              เพิ่ม
+            </button>
+            <button
+              className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-700 mt-2"
+              onClick={() => setShowModal(false)}
+            >
+              ปิด
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ตารางข้อสอบ */}
+      <div className="overflow-auto">
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b">รหัสข้อสอบ</th>
+              <th className="py-2 px-4 border-b">ชื่อวิชา</th>
+              <th className="py-2 px-4 border-b">ผู้สอน</th>
+              <th className="py-2 px-4 border-b">วัน/เวลา</th>
+              <th className="py-2 px-4 border-b">ดำเนินการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {exam.map((item) => (
+              <tr key={item.examid}>
+                <td className="py-2 px-4 border-b">{item.examid}</td>
+                <td className="py-2 px-4 border-b">{item.subjects?.Subname}</td>
+                <td className="py-2 px-4 border-b">{item.users?.full_name}</td>
+                <td className="py-2 px-4 border-b">{item.date}</td>
+                <td className="py-2 px-4 border-b text-center">
+                  <button
+                    onClick={() => handleViewExam(item)}
+                    className="text-blue-500 hover:text-blue-700 mr-10"
+                  >
+                    View
+                  </button>
+                  <button
+                    onClick={() => handleDeleteExam(item.examid)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+        {/* Modal สำหรับเพิ่มข้อมูล */}
+        {showModal && (
+  <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center p-20">
     <div className="bg-white p-8 rounded-lg w-96 max-h-[90vh] overflow-y-auto">
       <h2 className="text-xl font-semibold mb-4">เพิ่มข้อสอบ</h2>
       <div className="flex flex-col space-y-4">
@@ -350,55 +477,6 @@ export default function Page() {
   </div>
 )}
 
-
-      {/* Body */}
-      <div className="flex-1 overflow-auto">
-        <table className="min-w-full mt-5">
-        <thead className="w-full bg-pink-500 border-b">
-                        <tr className="w-full bg-pink-500 border-b">
-                            <th className="py-2 px-4 text-white">รหัสข้อสอบ</th>
-                            <th className="py-2 px-4 text-white">ชื่อวิชา</th>
-                            <th className="py-2 px-4 text-white">ผู้สอน</th>
-                            <th className="py-2 px-4 text-white">วัน/เวลาที่สอบ</th>
-                            <th className="py-2 px-4 text-white">สาขาวิชา</th>
-                            <th className="py-2 px-4 text-white">ภาคการศึกษา</th>
-                            <th className="py-2 px-4 text-white">ลิ้งค์จัดเก็บไฟล์ข้อสอบ</th>
-                            <th className="py-2 px-4 text-white">จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white text-center">
-                        {exam.length > 0 ? (
-                            exam.map((item, index) => (
-                            <tr key={index} className="border-b">
-                                <td className="py-2 px-4">{item?.examid}</td>
-                                <td className="py-2 px-4">{item?.subjects?.Subname}</td>
-                                <td className="py-2 px-4">{item?.users?.full_name}</td>
-                                <td className="py-2 px-4">{item?.date}</td>
-                                <td className="py-2 px-4">{item?.field_of_study}</td>
-                                <td className="py-2 px-4">{item?.semester}</td>
-                                <td className="py-2 px-4">
-                                <a href={item?.exam_link_file} target="_blank" rel="noopener noreferrer">
-                                    ดาวน์โหลด
-                                </a>
-                                </td>
-                                <td className="py-2 px-4">
-                                <button
-                                    onClick={() => handleDeleteExam(item.examid)}
-                                    className="text-red-500 hover:text-red-700"
-                                >
-                                    <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                                </button>
-                                </td>
-                            </tr>
-                            ))
-                        ) : (
-                            <tr>
-                            <td colSpan="8" className="py-4">ไม่มีข้อมูลข้อสอบ</td>
-                            </tr>
-                        )}
-                        </tbody>
-        </table>
-      </div>
     </div>
   );
 }
