@@ -246,11 +246,11 @@ export default function Page() {
                 <td className="py-2 px-4">{subject.Semester}</td>
                 <td className="py-2 px-4">{subject.Nums_of_student}</td>
                 <td className="py-2 px-4">
-                <button className="bg-yellow-400 text-black font-semibold py-2 px-4 rounded inline-flex items-center">
+                <button className="bg-yellow-400 text-black font-bolder py-2 px-4 rounded inline-flex items-center">
                 <PencilIcon className="h-5 w-5 mr-2" />
                         Edit
                 </button>
-                  <button className="bg-red-500 text-white font-semibold py-2 px-4 rounded ml-2 inline-flex items-center" onClick={() => handleDeleteSubject(subject.Subid)}>
+                  <button className="bg-red-500 text-white font-bolder py-2 px-4 rounded ml-2 inline-flex items-center" onClick={() => handleDeleteSubject(subject.Subid)}>
                 <TrashIcon className="h-5 w-5 mr-2" />
                        Delete
                 </button>
