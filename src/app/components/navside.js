@@ -109,9 +109,7 @@ export default function SideNav() {
           <button onClick={() => handleNavigation('/home/user-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
             จัดการผู้ใช้
           </button>
-          <button onClick={() => handleNavigation('/home/exam-management')} className="w-32 h-12 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white">
-            จัดการข้อสอบ
-          </button>
+        
         </>
       )}
       {role === 'Teacher' && (
